@@ -42,6 +42,23 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks {
+    withType<Test> {
+        useJUnitPlatform()
+    }
+
+    withType<org.springframework.boot.gradle.tasks.run.BootRun> {
+        systemProperty("spring.profiles.active", "dev")
+    }
+
+    register<Exec>("dockerBuild") {
+        dependsOn("build")
+        commandLine("docker", "build", "-t", "user-service:latest", ".")
+        environment("SPRING_PROFILES_ACTIVE", "prod")
+    }
+
+    withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+        archiveBaseName.set("user-service")
+        archiveVersion.set("")
+    }
 }
